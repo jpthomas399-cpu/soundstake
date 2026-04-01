@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SoundStake — Upload Music</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ink: #0c0b09; --ink2: #38352e; --ink3: #7a756c;
+      --paper: #f7f4ee; --cream: #efe9dc;
+      --gold: #b8821e; --gold-light: #f5e6c0; --gold-vivid: #d4941f;
+      --rule: #d8d2c4; --white: #ffffff;
+      --red: #9c2a1e; --red-light: #fbeae8;
+      --green: #1a5c2a; --green-light: #e8f5ec;
+    }
+    body { background: var(--paper); color: var(--ink); font-family: 'Syne', sans-serif; min-height: 100vh; }
+
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 20px 52px; background: rgba(247,244,238,0.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--rule); }
+    .nav-logo { font-family: 'Instrument Serif', serif; font-size: 1.3rem; color: var(--ink); text-decoration: none; }
+    .nav-logo em { font-style: italic; color: var(--gold); }
+    .nav-right { display: flex; align-items: center; gap: 24px; }
+    .nav-link { font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); text-decoration: none; transition: color 0.2s; }
+    .nav-link:hover { color: var(--ink); }
+    .nav-link.gold { color: var(--gold); }
+    .nav-link.gold:hover { color: var(--gold-vivid); }
+
+    .page-wrap { max-width: 880px; margin: 0 auto; padding: 120px 52px 100px; }
+
+    .page-header { margin-bottom: 52px; }
+    .page-eyebrow { font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; }
+    .page-title { font-family: 'Instrument Serif', serif; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.1; letter-spacing: -0.02em; color: var(--ink); }
+    .page-title em { font-style: italic; color: var(--gold); }
+    .page-sub { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--ink3); margin-top: 12px; line-height: 1.65; max-width: 560px; }
+
+    /* UPLOAD ZONE */
+    .upload-zone {
+      border: 2px dashed var(--rule);
+      padding: 60px 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+      margin-bottom: 40px;
+    }
+    .upload-zone:hover, .upload-zone.drag-over { border-color: var(--gold); background: var(--gold-light); }
+    .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    .upload-icon { font-size: 3rem; margin-bottom: 16px; }
+    .upload-title { font-family: 'Instrument Serif', serif; font-size: 1.5rem; color: var(--ink); margin-bottom: 10px; }
+    .upload-title em { font-style: italic; color: var(--gold); }
+    .upload-sub { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--ink3); line-height: 1.6; }
+    .upload-formats { display: flex; gap: 8px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+    .format-pill { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 12px; border: 1px solid var(--rule); color: var(--ink3); }
+
+    /* TRACK FORM (appears after file selected) */
+    .track-form-wrap { display: none; }
+    .track-form-wrap.show { display: block; }
+
+    .track-form-header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; padding: 20px 24px; background: var(--cream); border: 1px solid var(--rule); }
+    .track-form-icon { font-size: 1.8rem; }
+    .track-form-file-info {}
+    .track-form-filename { font-weight: 700; font-size: 0.9rem; color: var(--ink); }
+    .track-form-filesize { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--ink3); margin-top: 3px; }
+    .track-form-change { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--gold); cursor: pointer; text-decoration: underline; margin-left: auto; background: none; border: none; }
+
+    /* AUDIO PLAYER */
+    .audio-preview { margin-bottom: 28px; }
+    .audio-preview-label { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink3); margin-bottom: 10px; }
+    .custom-player {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--ink); padding: 16px 20px;
+    }
+    .play-btn { width: 36px; height: 36px; border-radius: 50%; background: var(--gold); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; flex-shrink: 0; transition: background 0.2s; }
+    .play-btn:hover { background: var(--gold-vivid); }
+    .player-info { flex: 1; }
+    .player-track-name { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: #e8e0d0; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .progress-wrap { position: relative; height: 4px; background: #2a2724; cursor: pointer; }
+    .progress-fill { height: 100%; background: var(--gold); width: 0%; transition: width 0.1s; pointer-events: none; }
+    .player-time { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #6a6460; flex-shrink: 0; min-width: 80px; text-align: right; }
+
+    /* FORM SECTIONS */
+    .form-section-title { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink2); margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--rule); display: flex; align-items: center; gap: 10px; }
+    .form-section-title span { font-family: 'DM Mono', monospace; font-size: 0.6rem; color: var(--gold); font-weight: 400; }
+    .form-section { margin-bottom: 40px; }
+
+    .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .field { margin-bottom: 16px; }
+    .field.full { grid-column: 1 / -1; }
+    .field label { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink2); display: block; margin-bottom: 7px; }
+    .field label .req { color: var(--gold); }
+    .field input, .field select, .field textarea { width: 100%; background: var(--cream); border: 1.5px solid var(--rule); padding: 11px 14px; font-family: 'DM Mono', monospace; font-size: 0.82rem; color: var(--ink); outline: none; transition: border-color 0.2s, background 0.2s; appearance: none; resize: none; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--gold); background: var(--gold-light); }
+    .field input.error { border-color: var(--red); }
+    .field-err { font-family: 'DM Mono', monospace; font-size: 0.63rem; color: var(--red); margin-top: 4px; display: none; }
+    .field-err.show { display: block; }
+    .field-hint { font-family: 'DM Mono', monospace; font-size: 0.63rem; color: var(--ink3); margin-top: 5px; }
+
+    .select-wrap { position: relative; }
+    .select-wrap::after { content: '▾'; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--ink3); pointer-events: none; font-size: 0.75rem; }
+
+    /* STAKE SETTING */
+    .stake-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 12px; }
+    .stake-opt { border: 1.5px solid var(--rule); padding: 14px 10px; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+    .stake-opt:hover { border-color: var(--ink3); }
+    .stake-opt.selected { border-color: var(--gold); background: var(--gold-light); }
+    .stake-opt input { display: none; }
+    .stake-amount { font-family: 'Instrument Serif', serif; font-size: 1.3rem; color: var(--ink); font-style: italic; }
+    .stake-label { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--ink3); margin-top: 3px; letter-spacing: 0.06em; }
+
+    /* TOGGLE */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+    .toggle-row:last-child { border-bottom: none; }
+    .toggle-info {}
+    .toggle-name { font-size: 0.88rem; font-weight: 600; color: var(--ink); margin-bottom: 3px; }
+    .toggle-desc { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--ink3); }
+    .toggle { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: var(--rule); cursor: pointer; transition: background 0.3s; }
+    .toggle-slider::before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; bottom: 3px; background: white; transition: transform 0.3s; }
+    .toggle input:checked + .toggle-slider { background: var(--gold); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+    /* ALERT */
+    .alert { padding: 12px 16px; font-family: 'DM Mono', monospace; font-size: 0.75rem; line-height: 1.5; margin-bottom: 16px; display: none; }
+    .alert.show { display: block; }
+    .alert.error { background: var(--red-light); border-left: 3px solid var(--red); color: var(--red); }
+    .alert.success { background: var(--green-light); border-left: 3px solid var(--green); color: var(--green); }
+
+    /* SUBMIT */
+    .submit-btn { font-family: 'DM Mono', monospace; font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; color: white; background: var(--ink); border: none; padding: 14px 36px; cursor: pointer; transition: background 0.2s, transform 0.15s; }
+    .submit-btn:hover { background: var(--gold); transform: translateY(-1px); }
+    .cancel-link { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--ink3); text-decoration: none; transition: color 0.2s; cursor: pointer; background: none; border: none; padding: 0; }
+    .cancel-link:hover { color: var(--ink); }
+    .form-actions { display: flex; gap: 16px; align-items: center; margin-top: 8px; }
+
+    /* TRACK LIST */
+    .tracks-section { margin-top: 72px; }
+    .tracks-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--rule); }
+    .tracks-header-title { font-family: 'Instrument Serif', serif; font-size: 1.6rem; letter-spacing: -0.02em; color: var(--ink); }
+    .tracks-header-title em { font-style: italic; color: var(--gold); }
+    .tracks-count { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--ink3); letter-spacing: 0.1em; }
+    .tracks-empty { padding: 48px; text-align: center; border: 1px dashed var(--rule); }
+    .tracks-empty-text { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--ink3); }
+
+    .track-item {
+      display: grid; grid-template-columns: auto 1fr auto auto;
+      align-items: center; gap: 20px;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--rule);
+      transition: background 0.15s;
+    }
+    .track-item:hover { background: var(--cream); }
+    .track-num { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--ink3); width: 20px; text-align: right; }
+    .track-info {}
+    .track-title-row { font-weight: 700; font-size: 0.95rem; color: var(--ink); margin-bottom: 3px; }
+    .track-meta { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--ink3); display: flex; gap: 12px; flex-wrap: wrap; }
+    .track-badge { font-family: 'DM Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 9px; }
+    .track-badge.open { background: var(--gold-light); color: var(--gold); border: 1px solid var(--gold); }
+    .track-badge.draft { background: var(--cream); color: var(--ink3); border: 1px solid var(--rule); }
+    .track-actions { display: flex; gap: 8px; }
+    .track-action-btn { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 5px 12px; border: 1px solid var(--rule); background: none; color: var(--ink3); cursor: pointer; transition: border-color 0.2s, color 0.2s; }
+    .track-action-btn:hover { border-color: var(--ink3); color: var(--ink); }
+    .track-action-btn.delete:hover { border-color: var(--red); color: var(--red); }
+
+    footer { background: #080706; padding: 36px 52px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; border-top: 1px solid #1e1c18; margin-top: 80px; }
+    .footer-logo { font-family: 'Instrument Serif', serif; font-size: 1rem; color: #4a4540; text-decoration: none; }
+    .footer-logo em { font-style: italic; color: var(--gold); }
+    .footer-copy { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: #3a3530; }
+
+    @media (max-width: 700px) {
+      nav { padding: 18px 20px; }
+      .page-wrap { padding: 100px 20px 80px; }
+      .field-grid { grid-template-columns: 1fr; }
+      .stake-options { grid-template-columns: 1fr 1fr; }
+      .track-item { grid-template-columns: 1fr auto; }
+      .track-num { display: none; }
+      footer { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo">Sound<em>Stake</em></a>
+    <div class="nav-right">
+      <a href="artist-profile.html" class="nav-link">My Profile</a>
+      <a href="how-it-works.html" class="nav-link">How It Works</a>
+      <a href="signup.html" class="nav-link gold">Sign In</a>
+    </div>
+  </nav>
+
+  <div class="page-wrap">
+
+    <div class="page-header">
+      <p class="page-eyebrow">Artist Dashboard</p>
+      <h1 class="page-title">Upload your <em>music</em></h1>
+      <p class="page-sub">Upload a track and set it open for staked critiques. Critics will stake SOUND tokens to leave feedback — every note they leave is permanent and on-chain.</p>
+    </div>
+
+    <!-- UPLOAD ZONE -->
+    <div class="upload-zone" id="upload-zone">
+      <input type="file" id="audio-input" accept=".mp3,.wav,.aiff,.flac,.m4a" multiple/>
+      <div class="upload-icon">🎵</div>
+      <div class="upload-title">Drop your track here, or <em>browse</em></div>
+      <p class="upload-sub">Drag and drop your audio file, or click to select from your computer.<br/>We'll generate a preview player automatically.</p>
+      <div class="upload-formats">
+        <span class="format-pill">MP3</span>
+        <span class="format-pill">WAV</span>
+        <span class="format-pill">AIFF</span>
+        <span class="format-pill">FLAC</span>
+        <span class="format-pill">M4A</span>
+        <span class="format-pill">Max 50MB</span>
+      </div>
+    </div>
+
+    <!-- TRACK SUBMISSION FORM -->
+    <div class="track-form-wrap" id="track-form-wrap">
+
+      <div class="track-form-header">
+        <div class="track-form-icon">🎵</div>
+        <div class="track-form-file-info">
+          <div class="track-form-filename" id="tf-filename">—</div>
+          <div class="track-form-filesize" id="tf-filesize">—</div>
+        </div>
+        <button type="button" class="track-form-change" onclick="resetUpload()">Change file ×</button>
+      </div>
+
+      <!-- AUDIO PREVIEW PLAYER -->
+      <div class="audio-preview">
+        <div class="audio-preview-label">Audio Preview</div>
+        <div class="custom-player">
+          <button class="play-btn" id="play-btn" onclick="togglePlay()">▶</button>
+          <div class="player-info">
+            <div class="player-track-name" id="player-name">—</div>
+            <div class="progress-wrap" id="progress-wrap" onclick="seekAudio(event)">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+          </div>
+          <div class="player-time" id="player-time">0:00 / 0:00</div>
+        </div>
+        <audio id="audio-el" preload="metadata"></audio>
+      </div>
+
+      <form id="track-form" novalidate>
+        <div id="track-alert" class="alert"></div>
+
+        <!-- TRACK INFO -->
+        <div class="form-section">
+          <div class="form-section-title">Track Details <span>Required</span></div>
+          <div class="field-grid">
+            <div class="field full">
+              <label for="track_title">Track Title <span class="req">*</span></label>
+              <input type="text" id="track_title" placeholder="e.g. Neon Undertow, Late Dispatch…"/>
+              <p class="field-err" id="err_track_title">Please enter a track title.</p>
+            </div>
+            <div class="field">
+              <label for="track_genre">Genre <span class="req">*</span></label>
+              <div class="select-wrap">
+                <select id="track_genre">
+                  <option value="">Select genre…</option>
+                  <option>Indie / Shoegaze</option>
+                  <option>Lo-fi / Jazz</option>
+                  <option>Electronic / Ambient</option>
+                  <option>Hip-Hop / Trap</option>
+                  <option>R&amp;B / Soul</option>
+                  <option>Pop</option>
+                  <option>Folk / Singer-Songwriter</option>
+                  <option>Classical / Orchestral</option>
+                  <option>Metal / Rock</option>
+                  <option>Experimental</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <p class="field-err" id="err_track_genre">Please select a genre.</p>
+            </div>
+            <div class="field">
+              <label for="track_version">Version / State</label>
+              <div class="select-wrap">
+                <select id="track_version">
+                  <option value="rough-mix">Rough Mix</option>
+                  <option value="demo">Demo</option>
+                  <option value="work-in-progress">Work in Progress</option>
+                  <option value="near-final">Near Final</option>
+                  <option value="final">Final Master</option>
+                </select>
+              </div>
+            </div>
+            <div class="field full">
+              <label for="track_notes">Notes for Critics <span class="req">*</span></label>
+              <textarea id="track_notes" rows="4" placeholder="What specifically do you want feedback on? E.g. 'The chorus feels thin — focus on the mix around 2:10. The arrangement is locked, ignore the structure. Main concern is low-mid clarity.'" maxlength="400"></textarea>
+              <p class="field-err" id="err_track_notes">Please add notes for critics (minimum 20 characters).</p>
+              <p class="field-hint">The more specific you are, the better feedback you'll get.</p>
+            </div>
+            <div class="field">
+              <label for="track_bpm">BPM</label>
+              <input type="number" id="track_bpm" placeholder="e.g. 120" min="40" max="300"/>
+            </div>
+            <div class="field">
+              <label for="track_key">Key / Scale</label>
+              <input type="text" id="track_key" placeholder="e.g. C minor, F# major"/>
+            </div>
+            <div class="field">
+              <label for="track_influences">Sonic References</label>
+              <input type="text" id="track_influences" placeholder="e.g. DIIV, early Weezer, Grouper"/>
+              <p class="field-hint">Artists whose sound this track aims toward.</p>
+            </div>
+            <div class="field">
+              <label for="track_collab">Collaborators</label>
+              <input type="text" id="track_collab" placeholder="Producer, co-writers, featured…"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- CRITIQUE SETTINGS -->
+        <div class="form-section">
+          <div class="form-section-title">Critique Settings <span>Controls how staking works for this track</span></div>
+          <div class="field">
+            <label>Minimum Stake Required from Critics</label>
+            <div class="stake-options" id="stake-options">
+              <label class="stake-opt selected" onclick="selectStake(this, '0.50')">
+                <input type="radio" name="stake" value="0.50"/>
+                <div class="stake-amount">$0.50</div>
+                <div class="stake-label">Standard</div>
+              </label>
+              <label class="stake-opt" onclick="selectStake(this, '1.00')">
+                <input type="radio" name="stake" value="1.00"/>
+                <div class="stake-amount">$1.00</div>
+                <div class="stake-label">Serious</div>
+              </label>
+              <label class="stake-opt" onclick="selectStake(this, '2.00')">
+                <input type="radio" name="stake" value="2.00"/>
+                <div class="stake-amount">$2.00</div>
+                <div class="stake-label">High Quality</div>
+              </label>
+              <label class="stake-opt" onclick="selectStake(this, '5.00')">
+                <input type="radio" name="stake" value="5.00"/>
+                <div class="stake-amount">$5.00</div>
+                <div class="stake-label">Expert Only</div>
+              </label>
+            </div>
+            <p class="field-hint" style="margin-top:10px;">Higher stakes attract more experienced critics but reduce total volume of feedback.</p>
+          </div>
+
+          <div style="margin-top:24px;">
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-name">Open for critique immediately</div>
+                <div class="toggle-desc">Track goes live for staked critique as soon as you submit. Disable to save as draft first.</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="toggle_open" checked/><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-name">Show critique notes publicly</div>
+                <div class="toggle-desc">Others can see the notes you've written for critics. Disable to keep them only visible to critiquers.</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="toggle_public_notes" checked/><span class="toggle-slider"></span></label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <div class="toggle-name">Allow anonymous wallet addresses</div>
+                <div class="toggle-desc">Critics with no public username can still stake and critique. Disable to require a profile.</div>
+              </div>
+              <label class="toggle"><input type="checkbox" id="toggle_anon" checked/><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="submit-btn" onclick="submitTrack()">Submit Track</button>
+          <button type="button" class="cancel-link" onclick="resetUpload()">Cancel</button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- TRACK LIST -->
+    <div class="tracks-section">
+      <div class="tracks-header">
+        <h2 class="tracks-header-title">Your <em>tracks</em></h2>
+        <span class="tracks-count" id="tracks-count">0 tracks</span>
+      </div>
+      <div id="tracks-list">
+        <div class="tracks-empty" id="tracks-empty">
+          <p class="tracks-empty-text">No tracks uploaded yet. Upload your first track above to open it for critique.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <a href="index.html" class="footer-logo">Sound<em>Stake</em></a>
+    <p class="footer-copy">© 2026 SoundStake · Built on Base · IPFS · ERC-20 / ERC-721</p>
+  </footer>
+
+  <script>
+    let currentFile = null;
+    let audioUrl = null;
+    let selectedStake = '0.50';
+    const audioEl = document.getElementById('audio-el');
+
+    // ── Drag & Drop ──
+    const zone = document.getElementById('upload-zone');
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault(); zone.classList.remove('drag-over');
+      const files = e.dataTransfer.files;
+      if (files.length) handleFile(files[0]);
+    });
+
+    document.getElementById('audio-input').addEventListener('change', function() {
+      if (this.files.length) handleFile(this.files[0]);
+    });
+
+    function handleFile(file) {
+      const allowed = ['audio/mpeg','audio/mp3','audio/wav','audio/aiff','audio/flac','audio/x-flac','audio/mp4','audio/m4a','audio/x-m4a'];
+      const ext = file.name.split('.').pop().toLowerCase();
+      const allowedExt = ['mp3','wav','aiff','aif','flac','m4a'];
+      if (!allowedExt.includes(ext)) { alert('Please upload an audio file: MP3, WAV, AIFF, FLAC, or M4A.'); return; }
+      if (file.size > 50 * 1024 * 1024) { alert('File must be under 50MB.'); return; }
+
+      currentFile = file;
+      if (audioUrl) URL.revokeObjectURL(audioUrl);
+      audioUrl = URL.createObjectURL(file);
+      audioEl.src = audioUrl;
+
+      document.getElementById('tf-filename').textContent = file.name;
+      document.getElementById('tf-filesize').textContent = formatSize(file.size);
+      document.getElementById('player-name').textContent = file.name.replace(/\.[^/.]+$/, '');
+
+      // Pre-fill title from filename
+      const guessTitle = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      document.getElementById('track_title').value = guessTitle;
+
+      zone.style.display = 'none';
+      document.getElementById('track-form-wrap').classList.add('show');
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+      return (bytes/1024/1024).toFixed(1) + ' MB';
+    }
+
+    function formatTime(secs) {
+      if (isNaN(secs)) return '0:00';
+      const m = Math.floor(secs/60), s = Math.floor(secs%60);
+      return m + ':' + String(s).padStart(2,'0');
+    }
+
+    function resetUpload() {
+      currentFile = null;
+      audioEl.pause(); audioEl.src = '';
+      document.getElementById('play-btn').textContent = '▶';
+      document.getElementById('progress-fill').style.width = '0%';
+      document.getElementById('player-time').textContent = '0:00 / 0:00';
+      document.getElementById('track-form-wrap').classList.remove('show');
+      document.getElementById('track-form').reset();
+      document.getElementById('track-alert').className = 'alert';
+      zone.style.display = '';
+      document.getElementById('audio-input').value = '';
+    }
+
+    // ── Audio Player ──
+    function togglePlay() {
+      if (audioEl.paused) { audioEl.play(); document.getElementById('play-btn').textContent = '⏸'; }
+      else { audioEl.pause(); document.getElementById('play-btn').textContent = '▶'; }
+    }
+    audioEl.addEventListener('timeupdate', () => {
+      const pct = audioEl.duration ? (audioEl.currentTime / audioEl.duration * 100) : 0;
+      document.getElementById('progress-fill').style.width = pct + '%';
+      document.getElementById('player-time').textContent = formatTime(audioEl.currentTime) + ' / ' + formatTime(audioEl.duration);
+    });
+    audioEl.addEventListener('ended', () => { document.getElementById('play-btn').textContent = '▶'; });
+
+    function seekAudio(e) {
+      const rect = document.getElementById('progress-wrap').getBoundingClientRect();
+      const pct = (e.clientX - rect.left) / rect.width;
+      audioEl.currentTime = pct * audioEl.duration;
+    }
+
+    // ── Stake selector ──
+    function selectStake(el, val) {
+      document.querySelectorAll('.stake-opt').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedStake = val;
+    }
+
+    // ── Submit ──
+    function submitTrack() {
+      const alertEl = document.getElementById('track-alert');
+      alertEl.className = 'alert';
+
+      const title = document.getElementById('track_title').value.trim();
+      const genre = document.getElementById('track_genre').value;
+      const notes = document.getElementById('track_notes').value.trim();
+
+      let ok = true;
+      const setErr = (id, show, msg) => {
+        const e = document.getElementById('err_'+id); if(e){if(msg)e.textContent=msg; e.classList.toggle('show',show);}
+        const inp = document.getElementById(id); if(inp) inp.classList.toggle('error',show);
+      };
+
+      setErr('track_title',!title,'Please enter a track title.'); if(!title) ok=false;
+      setErr('track_genre',!genre,'Please select a genre.'); if(!genre) ok=false;
+      setErr('track_notes',notes.length<20,'Please add notes for critics (min 20 chars).'); if(notes.length<20) ok=false;
+
+      if (!ok) { alertEl.textContent = 'Please fill in the required fields.'; alertEl.className = 'alert error show'; return; }
+
+      // Save track record (file itself stays in memory — no server)
+      const tracks = JSON.parse(localStorage.getItem('ss_tracks') || '[]');
+      const isOpen = document.getElementById('toggle_open').checked;
+      const track = {
+        id: Date.now(),
+        filename: currentFile ? currentFile.name : 'unknown.mp3',
+        filesize: currentFile ? currentFile.size : 0,
+        title,
+        genre,
+        version: document.getElementById('track_version').value,
+        notes,
+        bpm: document.getElementById('track_bpm').value,
+        key: document.getElementById('track_key').value,
+        influences: document.getElementById('track_influences').value,
+        collab: document.getElementById('track_collab').value,
+        stake: selectedStake,
+        openForCritique: isOpen,
+        publicNotes: document.getElementById('toggle_public_notes').checked,
+        allowAnon: document.getElementById('toggle_anon').checked,
+        uploaded: new Date().toISOString(),
+        critiques: 0,
+      };
+      tracks.push(track);
+      localStorage.setItem('ss_tracks', JSON.stringify(tracks));
+
+      // Show success, reset form
+      alertEl.textContent = `✓ "${title}" uploaded successfully! ${isOpen ? 'It is now open for staked critique.' : 'Saved as draft — toggle Open for Critique when ready.'}`;
+      alertEl.className = 'alert success show';
+
+      setTimeout(() => { resetUpload(); renderTracks(); }, 2000);
+    }
+
+    // ── Track List ──
+    function renderTracks() {
+      const tracks = JSON.parse(localStorage.getItem('ss_tracks') || '[]');
+      const list = document.getElementById('tracks-list');
+      const empty = document.getElementById('tracks-empty');
+      document.getElementById('tracks-count').textContent = tracks.length + ' track' + (tracks.length === 1 ? '' : 's');
+
+      if (!tracks.length) { empty.style.display = ''; return; }
+      empty.style.display = 'none';
+
+      list.innerHTML = tracks.map((t, i) => `
+        <div class="track-item">
+          <div class="track-num">${i + 1}</div>
+          <div class="track-info">
+            <div class="track-title-row">${escHtml(t.title)}</div>
+            <div class="track-meta">
+              <span>${escHtml(t.genre)}</span>
+              <span>${escHtml(t.version || '')}</span>
+              <span>Stake: $${t.stake}</span>
+              <span>${t.critiques} critique${t.critiques===1?'':'s'}</span>
+              <span>${new Date(t.uploaded).toLocaleDateString()}</span>
+            </div>
+          </div>
+          <span class="track-badge ${t.openForCritique ? 'open' : 'draft'}">${t.openForCritique ? 'Open' : 'Draft'}</span>
+          <div class="track-actions">
+            <button class="track-action-btn" onclick="toggleOpen(${t.id})">${t.openForCritique ? 'Close' : 'Open'}</button>
+            <button class="track-action-btn delete" onclick="deleteTrack(${t.id})">Remove</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleOpen(id) {
+      const tracks = JSON.parse(localStorage.getItem('ss_tracks') || '[]');
+      const t = tracks.find(t => t.id === id);
+      if (t) { t.openForCritique = !t.openForCritique; localStorage.setItem('ss_tracks', JSON.stringify(tracks)); renderTracks(); }
+    }
+
+    function deleteTrack(id) {
+      if (!confirm('Remove this track? This cannot be undone.')) return;
+      const tracks = JSON.parse(localStorage.getItem('ss_tracks') || '[]').filter(t => t.id !== id);
+      localStorage.setItem('ss_tracks', JSON.stringify(tracks));
+      renderTracks();
+    }
+
+    function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    renderTracks();
+  </script>
+</body>
+</html>

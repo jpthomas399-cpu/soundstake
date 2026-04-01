@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SoundStake — Create Account</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ink: #0c0b09; --ink2: #38352e; --ink3: #7a756c;
+      --paper: #f7f4ee; --cream: #efe9dc;
+      --gold: #b8821e; --gold-light: #f5e6c0; --gold-vivid: #d4941f;
+      --blue: #1a3a5c; --rule: #d8d2c4;
+      --red: #9c2a1e; --red-light: #fbeae8;
+      --green: #1a5c2a; --green-light: #e8f5ec;
+      --white: #ffffff;
+    }
+    html, body { height: 100%; }
+    body { background: var(--paper); color: var(--ink); font-family: 'Syne', sans-serif; min-height: 100vh; display: grid; grid-template-columns: 480px 1fr; }
+
+    /* LEFT PANEL */
+    .left { background: var(--ink); padding: 52px; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
+    .left::before { content: ''; position: absolute; inset: 0; background-image: repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(255,255,255,0.018) 59px, rgba(255,255,255,0.018) 60px), repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(255,255,255,0.018) 59px, rgba(255,255,255,0.018) 60px); }
+    .left-logo { position: relative; z-index: 1; font-family: 'Instrument Serif', serif; font-size: 1.25rem; color: #e8e0d0; text-decoration: none; }
+    .left-logo em { font-style: italic; color: var(--gold); }
+    .left-body { position: relative; z-index: 1; }
+    .left-tag { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 20px; }
+    .left-h1 { font-family: 'Instrument Serif', serif; font-size: clamp(2.2rem, 3.5vw, 3rem); line-height: 1.1; letter-spacing: -0.025em; color: #f0ece4; margin-bottom: 20px; }
+    .left-h1 em { font-style: italic; color: var(--gold); }
+    .left-desc { font-family: 'DM Mono', monospace; font-size: 0.78rem; color: #6a6460; line-height: 1.75; }
+    .left-quote { position: relative; z-index: 1; border-top: 1px solid #1e1c18; padding-top: 28px; }
+    .quote-text { font-family: 'Instrument Serif', serif; font-style: italic; font-size: 0.98rem; color: #8a8480; line-height: 1.65; margin-bottom: 14px; }
+    .quote-attr { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; color: #4a4540; }
+
+    /* RIGHT PANEL */
+    .right { padding: 52px; display: flex; flex-direction: column; justify-content: center; overflow-y: auto; }
+    .right-inner { max-width: 460px; width: 100%; margin: 0 auto; }
+
+    /* TAB: sign in / sign up */
+    .auth-tabs { display: flex; border-bottom: 1px solid var(--rule); margin-bottom: 36px; }
+    .auth-tab { font-family: 'DM Mono', monospace; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); padding: 12px 24px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; background: none; border-top: none; border-left: none; border-right: none; transition: color 0.2s, border-color 0.2s; }
+    .auth-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .form-title { font-family: 'Instrument Serif', serif; font-size: 1.8rem; letter-spacing: -0.02em; color: var(--ink); margin-bottom: 6px; }
+    .form-sub { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--ink3); margin-bottom: 32px; line-height: 1.5; }
+
+    /* Role selector */
+    .role-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+    .role-card { border: 1.5px solid var(--rule); padding: 18px; cursor: pointer; position: relative; transition: border-color 0.2s, background 0.2s; }
+    .role-card:hover { border-color: var(--ink3); }
+    .role-card.active { border-color: var(--gold); background: var(--gold-light); }
+    .role-card input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .role-card-icon { font-size: 1.3rem; margin-bottom: 8px; }
+    .role-card-label { font-size: 0.88rem; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+    .role-card-desc { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--ink3); line-height: 1.45; }
+    .role-check { position: absolute; top: 12px; right: 12px; width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--rule); display: flex; align-items: center; justify-content: center; }
+    .role-card.active .role-check { background: var(--gold); border-color: var(--gold); }
+    .role-check::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: white; opacity: 0; }
+    .role-card.active .role-check::after { opacity: 1; }
+
+    /* Fields */
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .field { margin-bottom: 16px; }
+    .field label { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink2); display: block; margin-bottom: 7px; }
+    .field label .req { color: var(--gold); }
+    .field input, .field select { width: 100%; background: var(--cream); border: 1.5px solid var(--rule); padding: 11px 14px; font-family: 'DM Mono', monospace; font-size: 0.82rem; color: var(--ink); outline: none; transition: border-color 0.2s, background 0.2s; appearance: none; }
+    .field input:focus, .field select:focus { border-color: var(--gold); background: var(--gold-light); }
+    .field input.error { border-color: var(--red); }
+    .field-err { font-family: 'DM Mono', monospace; font-size: 0.63rem; color: var(--red); margin-top: 4px; display: none; }
+    .field-err.show { display: block; }
+
+    /* Password strength */
+    .pw-bars { display: flex; gap: 3px; margin-top: 6px; }
+    .pw-bar { flex: 1; height: 3px; background: var(--rule); transition: background 0.3s; }
+    .pw-hint { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: var(--ink3); margin-top: 4px; min-height: 14px; }
+
+    /* Select wrapper */
+    .select-wrap { position: relative; }
+    .select-wrap::after { content: '▾'; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--ink3); pointer-events: none; font-size: 0.75rem; }
+
+    /* Alert */
+    .alert { padding: 12px 16px; font-family: 'DM Mono', monospace; font-size: 0.75rem; line-height: 1.5; margin-bottom: 16px; display: none; }
+    .alert.show { display: block; }
+    .alert.error { background: var(--red-light); border-left: 3px solid var(--red); color: var(--red); }
+    .alert.success { background: var(--green-light); border-left: 3px solid var(--green); color: var(--green); }
+
+    /* Submit */
+    .submit-btn { width: 100%; background: var(--ink); color: white; border: none; padding: 14px 24px; font-family: 'DM Mono', monospace; font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: background 0.2s, transform 0.15s; margin-top: 8px; }
+    .submit-btn:hover { background: var(--gold); transform: translateY(-1px); }
+    .submit-btn:disabled { background: var(--rule); color: var(--ink3); cursor: not-allowed; transform: none; }
+
+    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+    .divider-line { flex: 1; height: 1px; background: var(--rule); }
+    .divider-text { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: var(--ink3); letter-spacing: 0.1em; }
+
+    .text-link { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--gold); text-decoration: none; }
+    .text-link:hover { text-decoration: underline; }
+
+    /* Success view */
+    .success-view { display: none; text-align: center; padding: 20px 0; }
+    .success-view.show { display: block; }
+    .success-icon { font-size: 3rem; margin-bottom: 16px; }
+    .success-title { font-family: 'Instrument Serif', serif; font-size: 2rem; color: var(--ink); margin-bottom: 10px; }
+    .success-sub { font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--ink3); line-height: 1.7; margin-bottom: 28px; }
+    .success-badge { display: inline-block; font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; padding: 7px 18px; border: 1px solid var(--gold); color: var(--gold); background: var(--gold-light); margin-bottom: 24px; }
+    .success-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary { font-family: 'DM Mono', monospace; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: white; background: var(--ink); border: none; padding: 12px 28px; cursor: pointer; text-decoration: none; display: inline-block; transition: background 0.2s; }
+    .btn-primary:hover { background: var(--gold); }
+    .btn-ghost { font-family: 'DM Mono', monospace; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); background: transparent; border: 1px solid var(--rule); padding: 12px 28px; cursor: pointer; text-decoration: none; display: inline-block; transition: border-color 0.2s; }
+    .btn-ghost:hover { border-color: var(--ink3); }
+
+    /* Sign in extras */
+    .forgot-link { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--ink3); text-decoration: none; display: block; text-align: right; margin-top: -8px; margin-bottom: 16px; }
+    .forgot-link:hover { color: var(--gold); }
+
+    @media (max-width: 860px) {
+      body { grid-template-columns: 1fr; }
+      .left { display: none; }
+      .right { padding: 36px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LEFT -->
+  <div class="left">
+    <a href="index.html" class="left-logo">Sound<em>Stake</em></a>
+    <div class="left-body">
+      <p class="left-tag">Early Access · Spring 2026</p>
+      <h1 class="left-h1">Your critique.<br/><em>On the line.</em><br/>Your rep. Forever.</h1>
+      <p class="left-desc">Join SoundStake to be part of the first music feedback platform where quality is enforced — not hoped for. Critics stake tokens. Artists get real notes. Everyone's accountable.</p>
+    </div>
+    <div class="left-quote">
+      <p class="quote-text">"The staking mechanic pushed me to actually engage with the music. I wrote three paragraphs and earned tokens. First time feedback felt like a craft."</p>
+      <p class="quote-attr">— Beta Tester · Music Production Student</p>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+    <div class="right-inner">
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="showPanel('signup')">Create Account</button>
+        <button class="auth-tab" onclick="showPanel('signin')">Sign In</button>
+      </div>
+
+      <!-- SIGN UP PANEL -->
+      <div class="panel active" id="panel-signup">
+        <div id="signup-form-wrap">
+          <h2 class="form-title">Create your account</h2>
+          <p class="form-sub">Already have one? <a href="#" class="text-link" onclick="showPanel('signin');return false;">Sign in →</a></p>
+
+          <p style="font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink2);margin-bottom:14px;">I am joining as… <span style="color:var(--gold)">*</span></p>
+          <div class="role-row">
+            <label class="role-card" id="card-critic">
+              <input type="radio" name="su_role" value="critic" id="su_critic"/>
+              <div class="role-card-icon">🎧</div>
+              <div class="role-card-label">Critic</div>
+              <div class="role-card-desc">Write staked critiques, earn SOUND tokens, build on-chain rep.</div>
+              <div class="role-check"></div>
+            </label>
+            <label class="role-card" id="card-artist">
+              <input type="radio" name="su_role" value="artist" id="su_artist"/>
+              <div class="role-card-icon">🎵</div>
+              <div class="role-card-label">Artist</div>
+              <div class="role-card-desc">Upload tracks, receive substantive staked feedback from critics.</div>
+              <div class="role-check"></div>
+            </label>
+          </div>
+
+          <div id="su-alert" class="alert error"></div>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="su_first">First Name <span class="req">*</span></label>
+              <input type="text" id="su_first" placeholder="Maya" autocomplete="given-name"/>
+              <p class="field-err" id="err_su_first">Required.</p>
+            </div>
+            <div class="field">
+              <label for="su_last">Last Name <span class="req">*</span></label>
+              <input type="text" id="su_last" placeholder="Chen" autocomplete="family-name"/>
+              <p class="field-err" id="err_su_last">Required.</p>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="su_email">Email Address <span class="req">*</span></label>
+            <input type="email" id="su_email" placeholder="you@example.com" autocomplete="email"/>
+            <p class="field-err" id="err_su_email">Enter a valid email.</p>
+          </div>
+
+          <div class="field">
+            <label for="su_username">Username <span class="req">*</span></label>
+            <input type="text" id="su_username" placeholder="neon_critic" autocomplete="username"/>
+            <p class="field-err" id="err_su_username">3–20 chars, letters/numbers/underscores only.</p>
+          </div>
+
+          <div class="field">
+            <label for="su_password">Password <span class="req">*</span></label>
+            <input type="password" id="su_password" placeholder="At least 8 characters" autocomplete="new-password"/>
+            <div class="pw-bars"><div class="pw-bar" id="pb1"></div><div class="pw-bar" id="pb2"></div><div class="pw-bar" id="pb3"></div><div class="pw-bar" id="pb4"></div></div>
+            <p class="pw-hint" id="pw_hint"></p>
+            <p class="field-err" id="err_su_password">Minimum 8 characters.</p>
+          </div>
+
+          <div class="field">
+            <label for="su_password2">Confirm Password <span class="req">*</span></label>
+            <input type="password" id="su_password2" placeholder="Repeat password" autocomplete="new-password"/>
+            <p class="field-err" id="err_su_password2">Passwords do not match.</p>
+          </div>
+
+          <button class="submit-btn" onclick="doSignup()">Create Account</button>
+        </div>
+
+        <!-- Success -->
+        <div class="success-view" id="signup-success">
+          <div class="success-icon">🎉</div>
+          <h2 class="success-title">You're in.</h2>
+          <div class="success-badge" id="su-role-badge">Critic Account</div>
+          <p class="success-sub">Account created successfully, <strong id="su-welcome-name"></strong>. Head to your profile or start exploring the platform.</p>
+          <div class="success-actions">
+            <a href="artist-profile.html" class="btn-primary" id="su-next-btn">Set Up Profile →</a>
+            <a href="index.html" class="btn-ghost">Go to Home</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIGN IN PANEL -->
+      <div class="panel" id="panel-signin">
+        <div id="signin-form-wrap">
+          <h2 class="form-title">Welcome back.</h2>
+          <p class="form-sub">Don't have an account? <a href="#" class="text-link" onclick="showPanel('signup');return false;">Create one →</a></p>
+
+          <div id="si-alert" class="alert error"></div>
+
+          <div class="field">
+            <label for="si_email">Email or Username <span class="req">*</span></label>
+            <input type="text" id="si_email" placeholder="you@example.com or neon_critic" autocomplete="username"/>
+            <p class="field-err" id="err_si_email">This field is required.</p>
+          </div>
+
+          <div class="field">
+            <label for="si_password">Password <span class="req">*</span></label>
+            <input type="password" id="si_password" placeholder="Your password" autocomplete="current-password"/>
+            <p class="field-err" id="err_si_password">This field is required.</p>
+          </div>
+          <a href="#" class="forgot-link" onclick="showForgot();return false;">Forgot password?</a>
+
+          <button class="submit-btn" onclick="doSignin()">Sign In</button>
+
+          <div class="divider"><div class="divider-line"></div><span class="divider-text">or</span><div class="divider-line"></div></div>
+          <p style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--ink3);text-align:center;">New to SoundStake? <a href="#" class="text-link" onclick="showPanel('signup');return false;">Create a free account</a></p>
+        </div>
+
+        <!-- Success -->
+        <div class="success-view" id="signin-success">
+          <div class="success-icon">👋</div>
+          <h2 class="success-title">Welcome back.</h2>
+          <p class="success-sub">Signed in as <strong id="si-welcome-name"></strong>. Where would you like to go?</p>
+          <div class="success-actions">
+            <a href="artist-upload.html" class="btn-primary">Upload Music</a>
+            <a href="artist-profile.html" class="btn-ghost">My Profile</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ── Panel switching ──
+    function showPanel(p) {
+      document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (i===0 && p==='signup') || (i===1 && p==='signin')));
+      document.getElementById('panel-signup').classList.toggle('active', p==='signup');
+      document.getElementById('panel-signin').classList.toggle('active', p==='signin');
+    }
+
+    // ── Role cards ──
+    document.querySelectorAll('input[name="su_role"]').forEach(r => {
+      r.addEventListener('change', () => {
+        document.getElementById('card-critic').classList.toggle('active', r.value==='critic' && r.checked);
+        document.getElementById('card-artist').classList.toggle('active', r.value==='artist' && r.checked);
+      });
+    });
+    document.getElementById('card-critic').addEventListener('click', () => {
+      document.getElementById('su_critic').checked = true;
+      document.getElementById('card-critic').classList.add('active');
+      document.getElementById('card-artist').classList.remove('active');
+    });
+    document.getElementById('card-artist').addEventListener('click', () => {
+      document.getElementById('su_artist').checked = true;
+      document.getElementById('card-artist').classList.add('active');
+      document.getElementById('card-critic').classList.remove('active');
+    });
+    // default: critic selected
+    document.getElementById('su_critic').checked = true;
+    document.getElementById('card-critic').classList.add('active');
+
+    // ── Password strength ──
+    document.getElementById('su_password').addEventListener('input', function() {
+      const v = this.value;
+      let s = 0;
+      if (v.length >= 8) s++;
+      if (/[A-Z]/.test(v)) s++;
+      if (/[0-9]/.test(v)) s++;
+      if (/[^a-zA-Z0-9]/.test(v)) s++;
+      const c = ['','#c0392b','#d4941f','#b8821e','#1a5c2a'][s];
+      const l = ['','Weak','Fair','Good','Strong'][s];
+      [1,2,3,4].forEach(i => document.getElementById('pb'+i).style.background = i<=s ? c : 'var(--rule)');
+      document.getElementById('pw_hint').textContent = s > 0 ? l : '';
+      document.getElementById('pw_hint').style.color = c;
+    });
+
+    // ── Helpers ──
+    function setErr(id, msg, show) {
+      const el = document.getElementById('err_'+id);
+      if (el) { if (msg) el.textContent = msg; el.classList.toggle('show', show); }
+      const inp = document.getElementById(id);
+      if (inp) inp.classList.toggle('error', show);
+    }
+    function showAlert(id, msg, type='error') {
+      const el = document.getElementById(id);
+      el.textContent = msg; el.className = 'alert ' + type + ' show';
+    }
+    function hideAlert(id) { document.getElementById(id).className = 'alert'; }
+
+    // ── SIGN UP ──
+    function doSignup() {
+      hideAlert('su-alert');
+      let ok = true;
+
+      const role = document.querySelector('input[name="su_role"]:checked');
+      if (!role) { showAlert('su-alert','Please select a role.'); return; }
+
+      const first = document.getElementById('su_first').value.trim();
+      setErr('su_first','Required.',!first); if(!first) ok=false;
+
+      const last = document.getElementById('su_last').value.trim();
+      setErr('su_last','Required.',!last); if(!last) ok=false;
+
+      const email = document.getElementById('su_email').value.trim();
+      const emailOk = email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      setErr('su_email','Enter a valid email.',!emailOk); if(!emailOk) ok=false;
+
+      const username = document.getElementById('su_username').value.trim();
+      const usernameOk = username && username.length>=3 && username.length<=20 && /^[a-zA-Z0-9_]+$/.test(username);
+      setErr('su_username','3–20 chars, letters/numbers/underscores only.',!usernameOk); if(!usernameOk) ok=false;
+
+      const password = document.getElementById('su_password').value;
+      setErr('su_password','Minimum 8 characters.',password.length < 8); if(password.length < 8) ok=false;
+
+      const password2 = document.getElementById('su_password2').value;
+      setErr('su_password2','Passwords do not match.',password !== password2); if(password !== password2) ok=false;
+
+      if (!ok) return;
+
+      // Check if email/username already taken
+      const existing = JSON.parse(localStorage.getItem('ss_users') || '[]');
+      if (existing.find(u => u.email === email)) { showAlert('su-alert','An account with that email already exists.'); return; }
+      if (existing.find(u => u.username === username)) { showAlert('su-alert','That username is already taken.'); return; }
+
+      // Save user
+      const user = { id: Date.now(), first, last, email, username, password, role: role.value, created: new Date().toISOString() };
+      existing.push(user);
+      localStorage.setItem('ss_users', JSON.stringify(existing));
+      localStorage.setItem('ss_session', JSON.stringify({ id: user.id, username, first, last, role: role.value, email }));
+
+      // Show success
+      document.getElementById('signup-form-wrap').style.display = 'none';
+      const success = document.getElementById('signup-success');
+      success.classList.add('show');
+      document.getElementById('su-welcome-name').textContent = first;
+      document.getElementById('su-role-badge').textContent = role.value === 'artist' ? '🎵 Artist Account' : '🎧 Critic Account';
+      if (role.value === 'artist') {
+        document.getElementById('su-next-btn').href = 'artist-profile.html';
+        document.getElementById('su-next-btn').textContent = 'Set Up Artist Profile →';
+      } else {
+        document.getElementById('su-next-btn').href = 'index.html';
+        document.getElementById('su-next-btn').textContent = 'Explore SoundStake →';
+      }
+    }
+
+    // ── SIGN IN ──
+    function doSignin() {
+      hideAlert('si-alert');
+      let ok = true;
+
+      const identifier = document.getElementById('si_email').value.trim();
+      setErr('si_email','This field is required.',!identifier); if(!identifier) ok=false;
+
+      const password = document.getElementById('si_password').value;
+      setErr('si_password','This field is required.',!password); if(!password) ok=false;
+
+      if (!ok) return;
+
+      const users = JSON.parse(localStorage.getItem('ss_users') || '[]');
+      const user = users.find(u => (u.email === identifier || u.username === identifier) && u.password === password);
+      if (!user) { showAlert('si-alert','Incorrect email/username or password.'); return; }
+
+      localStorage.setItem('ss_session', JSON.stringify({ id: user.id, username: user.username, first: user.first, last: user.last, role: user.role, email: user.email }));
+
+      document.getElementById('signin-form-wrap').style.display = 'none';
+      document.getElementById('signin-success').classList.add('show');
+      document.getElementById('si-welcome-name').textContent = user.first;
+    }
+
+    function showForgot() {
+      showAlert('si-alert','Password reset is not yet implemented. Please contact support.','error');
+    }
+
+    // Pre-fill role from URL param
+    const p = new URLSearchParams(window.location.search);
+    if (p.get('role') === 'artist') {
+      document.getElementById('su_artist').checked = true;
+      document.getElementById('card-artist').classList.add('active');
+      document.getElementById('card-critic').classList.remove('active');
+    }
+  </script>
+</body>
+</html>
