@@ -1,199 +1,72 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SoundStake — Stake Your Critique. Earn Your Rep.</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --ink: #0c0b09; --ink2: #38352e; --ink3: #7a756c;
-      --paper: #f7f4ee; --cream: #efe9dc;
-      --gold: #b8821e; --gold-light: #f5e6c0; --gold-vivid: #d4941f;
-      --blue: #1a3a5c; --blue-light: #dce8f5;
-      --rule: #d8d2c4; --white: #ffffff;
-    }
-    html { scroll-behavior: smooth; }
-    body { background: var(--paper); color: var(--ink); font-family: 'Syne', sans-serif; overflow-x: hidden; }
-
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 22px 52px;
-      background: rgba(247,244,238,0.94); backdrop-filter: blur(12px);
-      border-bottom: 1px solid transparent; transition: border-color 0.3s;
-    }
-    nav.scrolled { border-bottom-color: var(--rule); }
-    .nav-logo { font-family: 'Instrument Serif', serif; font-size: 1.3rem; color: var(--ink); text-decoration: none; }
-    .nav-logo em { font-style: italic; color: var(--gold); }
-    .nav-links { display: flex; gap: 36px; list-style: none; align-items: center; }
-    .nav-links a { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); text-decoration: none; transition: color 0.2s; }
-    .nav-links a:hover { color: var(--ink); }
-    .nav-cta { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white); background: var(--ink); border: none; padding: 10px 24px; cursor: pointer; text-decoration: none; transition: background 0.2s, transform 0.15s; display: inline-block; }
-    .nav-cta:hover { background: var(--gold); transform: translateY(-1px); }
-
-    .hero { min-height: 100vh; display: grid; grid-template-rows: 1fr auto; padding: 140px 52px 80px; position: relative; overflow: hidden; }
-    .hero-grid { position: absolute; inset: 0; background-image: repeating-linear-gradient(90deg, transparent, transparent 79px, var(--rule) 79px, var(--rule) 80px), repeating-linear-gradient(0deg, transparent, transparent 79px, var(--rule) 79px, var(--rule) 80px); opacity: 0.3; }
-    .hero-content { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 2rem; max-width: 820px; }
-    .hero-eyebrow { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); opacity: 0; animation: fadeUp 0.7s 0.1s forwards; }
-    .hero-h1 { font-family: 'Instrument Serif', serif; font-size: clamp(3.5rem, 7.5vw, 6.5rem); line-height: 1.04; letter-spacing: -0.025em; color: var(--ink); opacity: 0; animation: fadeUp 0.8s 0.25s forwards; }
-    .hero-h1 em { font-style: italic; color: var(--gold); }
-    .hero-sub { font-size: 1.1rem; color: var(--ink2); max-width: 520px; line-height: 1.7; opacity: 0; animation: fadeUp 0.8s 0.4s forwards; }
-    .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; opacity: 0; animation: fadeUp 0.8s 0.55s forwards; }
-
-    .btn-outline { font-family: 'DM Mono', monospace; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink2); background: transparent; border: 1px solid var(--rule); padding: 15px 36px; cursor: pointer; text-decoration: none; display: inline-block; transition: border-color 0.2s, color 0.2s, transform 0.15s; }
-    .btn-outline:hover { border-color: var(--ink3); color: var(--ink); transform: translateY(-2px); }
-
-    .hero-bottom { position: relative; z-index: 1; display: flex; gap: 52px; flex-wrap: wrap; border-top: 1px solid var(--rule); padding-top: 36px; margin-top: 20px; opacity: 0; animation: fadeUp 0.8s 0.7s forwards; }
-    .hero-stat-num { font-family: 'Instrument Serif', serif; font-size: 2.2rem; color: var(--ink); line-height: 1; }
-    .hero-stat-num em { font-style: normal; color: var(--gold); }
-    .hero-stat-label { font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink3); margin-top: 6px; }
-
-    @keyframes fadeUp { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
-
-    section { padding: 100px 52px; }
-    .section-label-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
-    .section-num { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--gold); letter-spacing: 0.12em; }
-    .section-rule-line { flex: 1; height: 1px; background: var(--rule); }
-    .section-title { font-family: 'Instrument Serif', serif; font-size: clamp(2.2rem, 4vw, 3.4rem); line-height: 1.1; letter-spacing: -0.02em; color: var(--ink); margin-bottom: 1.25rem; }
-    .section-title em { font-style: italic; color: var(--gold); }
-    .section-body { font-size: 1rem; color: var(--ink2); line-height: 1.75; max-width: 600px; margin-bottom: 1.25rem; }
-
-    #who { background: var(--ink); }
-    #who .section-title { color: var(--paper); }
-    #who .section-body { color: #a09890; }
-    #who .section-num { color: var(--gold-vivid); }
-    #who .section-rule-line { background: #2a2724; }
-    .who-tabs { display: flex; border-bottom: 1px solid #2a2724; margin-top: 48px; }
-    .who-tab { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: #5a5450; padding: 14px 32px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.2s, border-color 0.2s; background: none; border-top: none; border-left: none; border-right: none; }
-    .who-tab.active { color: var(--gold-vivid); border-bottom-color: var(--gold-vivid); }
-    .who-tab:hover:not(.active) { color: #9a9490; }
-    .who-panel { display: none; padding: 52px 0; }
-    .who-panel.active { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
-    .benefit-card { background: #14120f; border: 1px solid #2a2724; padding: 36px 32px; transition: border-color 0.2s; }
-    .benefit-card:hover { border-color: #4a4540; }
-    .benefit-tag { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold-vivid); margin-bottom: 16px; display: block; }
-    .benefit-title { font-size: 1rem; font-weight: 700; color: #e8e0d0; margin-bottom: 12px; }
-    .benefit-body { font-family: 'DM Mono', monospace; font-size: 0.78rem; color: #6a6460; line-height: 1.7; }
-
-    #cta { background: var(--ink); padding: 120px 52px; text-align: center; position: relative; overflow: hidden; }
-    #cta::before { content: 'SOUNDSTAKE'; position: absolute; font-family: 'Instrument Serif', serif; font-size: 18vw; color: rgba(255,255,255,0.03); top: 50%; left: 50%; transform: translate(-50%,-50%); white-space: nowrap; pointer-events: none; letter-spacing: -0.05em; }
-    .cta-label { font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-vivid); margin-bottom: 24px; }
-    .cta-title { font-family: 'Instrument Serif', serif; font-size: clamp(2.5rem, 5vw, 4rem); color: var(--paper); letter-spacing: -0.025em; line-height: 1.1; margin-bottom: 20px; }
-    .cta-title em { font-style: italic; color: var(--gold); }
-    .cta-sub { font-family: 'DM Mono', monospace; font-size: 0.85rem; color: #7a7470; max-width: 480px; margin: 0 auto 48px; line-height: 1.65; }
-    .cta-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; position: relative; z-index: 1; }
-    .btn-gold { font-family: 'DM Mono', monospace; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); background: var(--gold); border: none; padding: 16px 40px; cursor: pointer; text-decoration: none; display: inline-block; transition: background 0.2s, transform 0.15s; }
-    .btn-gold:hover { background: var(--gold-vivid); transform: translateY(-2px); }
-    .btn-outline-light { font-family: 'DM Mono', monospace; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: #a0988c; background: transparent; border: 1px solid #3a3530; padding: 16px 40px; cursor: pointer; text-decoration: none; display: inline-block; transition: border-color 0.2s, color 0.2s, transform 0.15s; }
-    .btn-outline-light:hover { border-color: #6a6460; color: var(--paper); transform: translateY(-2px); }
-
-    footer { background: #080706; padding: 48px 52px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; border-top: 1px solid #1e1c18; }
-    .footer-logo { font-family: 'Instrument Serif', serif; font-size: 1.1rem; color: #4a4540; text-decoration: none; }
-    .footer-logo em { font-style: italic; color: var(--gold); }
-    .footer-links { display: flex; gap: 28px; list-style: none; }
-    .footer-links a { font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: #4a4540; text-decoration: none; transition: color 0.2s; }
-    .footer-links a:hover { color: #8a8480; }
-    .footer-copy { font-family: 'DM Mono', monospace; font-size: 0.65rem; color: #3a3530; }
-
-    .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.65s ease, transform 0.65s ease; }
-    .reveal.visible { opacity: 1; transform: none; }
-
-    @media (max-width: 900px) {
-      nav { padding: 18px 24px; } .nav-links { display: none; }
-      .hero, section { padding-left: 24px; padding-right: 24px; }
-      .who-panel.active { grid-template-columns: 1fr; }
-      footer { flex-direction: column; align-items: flex-start; }
-      #cta { padding: 80px 24px; }
-    }
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.7">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
   </style>
 </head>
 <body>
-  <nav id="nav">
-    <a href="index.html" class="nav-logo">Sound<em>Stake</em></a>
-    <ul class="nav-links">
-      <li><a href="how-it-works.html">How It Works</a></li>
-      <li><a href="#who">Who It's For</a></li>
-      <li><a href="artist-upload.html">Upload Music</a></li>
-    </ul>
-    <a href="signup.html" class="nav-cta">Get Started</a>
-  </nav>
-
-  <section class="hero">
-    <div class="hero-grid"></div>
-    <div class="hero-content">
-      <p class="hero-eyebrow">Music Critique · Blockchain · Community</p>
-      <h1 class="hero-h1">Stake your<br/>critique.<br/><em>Earn your rep.</em></h1>
-      <p class="hero-sub">SoundStake adds a staking layer to music feedback. Write a real critique, put tokens on the line, and get rewarded when the community agrees it was useful. Built on Base. No middlemen.</p>
-      <div class="hero-actions">
-        <a href="how-it-works.html" class="btn-outline">See How It Works →</a>
-      </div>
-    </div>
-    <div class="hero-bottom">
-      <div class="hero-stat"><div class="hero-stat-num">~$0<em>.50</em></div><div class="hero-stat-label">Min. Stake to Critique</div></div>
-      <div class="hero-stat"><div class="hero-stat-num">48<em>h</em></div><div class="hero-stat-label">Community Vote Window</div></div>
-      <div class="hero-stat"><div class="hero-stat-num">60<em>%</em></div><div class="hero-stat-label">Approval Threshold</div></div>
-      <div class="hero-stat"><div class="hero-stat-num">5<em>%</em></div><div class="hero-stat-label">Platform Fee on Settled Stakes</div></div>
-    </div>
-  </section>
-
-  <section id="who">
-    <div class="section-label-row reveal"><span class="section-num">01</span><div class="section-rule-line"></div></div>
-    <h2 class="section-title reveal">Who it's <em>built for</em></h2>
-    <p class="section-body reveal" style="color:#a09890;">Two user types. One ecosystem that makes both better.</p>
-    <div class="who-tabs reveal">
-      <button class="who-tab active" onclick="switchTab('critics')">For Critics</button>
-      <button class="who-tab" onclick="switchTab('artists')">For Artists</button>
-    </div>
-    <div class="who-panel active" id="panel-critics">
-      <div class="benefit-card"><span class="benefit-tag">Earn</span><div class="benefit-title">Turn Music Knowledge Into Income</div><div class="benefit-body">If you know music and write thoughtful critiques, you earn tokens for it. One of the few places where music taste has a direct, immediate financial return.</div></div>
-      <div class="benefit-card"><span class="benefit-tag">Build</span><div class="benefit-title">A Credential That's Yours</div><div class="benefit-body">Your reputation badge stays in your wallet forever. Verifiable by labels and publishers — not tied to a grade or a letter.</div></div>
-      <div class="benefit-card"><span class="benefit-tag">Experience</span><div class="benefit-title">Real Blockchain Interaction</div><div class="benefit-body">Use an actual crypto wallet. Stake real tokens. Interact with a deployed smart contract. Not a demo. Worth putting on a resume.</div></div>
-      <div class="benefit-card"><span class="benefit-tag">Reputation</span><div class="benefit-title">Become Searchable</div><div class="benefit-body">A track record of approved critiques across genres is more concrete proof of taste than anything in a cover letter.</div></div>
-    </div>
-    <div class="who-panel" id="panel-artists">
-      <div class="benefit-card"><span class="benefit-tag">Quality</span><div class="benefit-title">Feedback That Actually Helps</div><div class="benefit-body">When critics have money on the line, "sounds good" doesn't cut it. The staking mechanic filters noise and surfaces substantive notes.</div></div>
-      <div class="benefit-card"><span class="benefit-tag">Trust</span><div class="benefit-title">Know Who's Credible</div><div class="benefit-body">Every critic has a visible on-chain reputation score. Weight feedback from experienced voices and skip low-rep commenters.</div></div>
-      <div class="benefit-card"><span class="benefit-tag">Community</span><div class="benefit-title">Self-Policing Ecosystem</div><div class="benefit-body">Bad actors lose tokens. Over time the pool of critics around your work improves automatically — no moderation team needed.</div></div>
-      <div class="benefit-card"><span class="benefit-tag">Record</span><div class="benefit-title">Permanent Feedback Archive</div><div class="benefit-body">Every critique is on-chain and immutable. A public, timestamped record of your creative development — from first upload to breakout.</div></div>
-    </div>
-  </section>
-
-  <section id="cta">
-    <div class="cta-label reveal">Ready to stake your claim?</div>
-    <h2 class="cta-title reveal">Be first on <em>SoundStake.</em></h2>
-    <p class="cta-sub reveal">Join as a critic and earn from your music knowledge — or sign up as an artist and get feedback that's actually worth reading.</p>
-    <div class="cta-btns reveal">
-      <a href="signup.html" class="btn-gold">Create Your Account</a>
-      <a href="artist-profile.html" class="btn-outline-light">I'm an Artist →</a>
-    </div>
-  </section>
-
-  <footer>
-    <a href="index.html" class="footer-logo">Sound<em>Stake</em></a>
-    <ul class="footer-links">
-      <li><a href="how-it-works.html">How It Works</a></li>
-      <li><a href="signup.html">Sign Up</a></li>
-      <li><a href="artist-profile.html">Artist Profile</a></li>
-      <li><a href="artist-upload.html">Upload Music</a></li>
-    </ul>
-    <p class="footer-copy">© 2026 SoundStake · Built on Base · IPFS · ERC-20 / ERC-721</p>
-  </footer>
-
-  <script>
-    const nav = document.getElementById('nav');
-    window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 40));
-    const obs = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } }), { threshold: 0.1 });
-    document.querySelectorAll('.reveal').forEach(r => obs.observe(r));
-    function switchTab(tab) {
-      document.querySelectorAll('.who-tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.who-panel').forEach(p => p.classList.remove('active'));
-      document.querySelector(`.who-tab[onclick*="${tab}"]`).classList.add('active');
-      document.getElementById(`panel-${tab}`).classList.add('active');
-    }
-  </script>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="en"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;title&gt;SoundStake Signup&lt;/title&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;h2&gt;Sign Up&lt;/h2&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;input type="text" id="username" placeholder="Username"&gt;&lt;br&gt;&lt;br&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;input type="email" id="email" placeholder="Email"&gt;&lt;br&gt;&lt;br&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;input type="password" id="password" placeholder="Password"&gt;&lt;br&gt;&lt;br&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;button onclick="signUp()"&gt;Sign Up&lt;/button&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;script type="module"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";</p>
+<p class="p1"><span class="Apple-converted-space">    </span>import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";</p>
+<p class="p1"><span class="Apple-converted-space">    </span>import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>// 🔥 PASTE YOUR FIREBASE CONFIG HERE</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const firebaseConfig = {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>apiKey: "PASTE_HERE",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>authDomain: "PASTE_HERE",</p>
+<p class="p1"><span class="Apple-converted-space">      </span>projectId: "PASTE_HERE"</p>
+<p class="p1"><span class="Apple-converted-space">    </span>};</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>const app = initializeApp(firebaseConfig);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const auth = getAuth(app);</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const db = getFirestore(app);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>window.signUp = async function () {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const username = document.getElementById("username").value;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const email = document.getElementById("email").value;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const password = document.getElementById("password").value;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">      </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const userCredential = await createUserWithEmailAndPassword(auth, email, password);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const user = userCredential.user;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>await setDoc(doc(db, "users", user.uid), {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>username: username,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>email: email,</p>
+<p class="p1"><span class="Apple-converted-space">          </span>createdAt: new Date()</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>alert("Signup successful!");</p>
+<p class="p1"><span class="Apple-converted-space">      </span>} catch (error) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>alert(error.message);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>};</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/script&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
 </body>
 </html>
