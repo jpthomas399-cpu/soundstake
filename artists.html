@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SoundStake — Artists</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ink:        #0c0b09;
+      --ink2:       #38352e;
+      --ink3:       #7a756c;
+      --paper:      #f7f4ee;
+      --cream:      #efe9dc;
+      --gold:       #b8821e;
+      --gold-light: #f5e6c0;
+      --gold-vivid: #d4941f;
+      --rule:       #d8d2c4;
+      --white:      #ffffff;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--paper); color: var(--ink); font-family: 'Syne', sans-serif; min-height: 100vh; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 52px;
+      background: rgba(247, 244, 238, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--rule);
+    }
+    .nav-logo { font-family: 'Instrument Serif', serif; font-size: 1.3rem; color: var(--ink); text-decoration: none; }
+    .nav-logo em { font-style: italic; color: var(--gold); }
+    .nav-links { display: flex; gap: 36px; list-style: none; align-items: center; }
+    .nav-links a { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--ink); }
+    .nav-cta { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white); background: var(--ink); border: none; padding: 10px 24px; cursor: pointer; text-decoration: none; transition: background 0.2s; display: inline-block; }
+    .nav-cta:hover { background: var(--gold); }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      padding: 140px 52px 60px;
+      border-bottom: 1px solid var(--rule);
+      position: relative; overflow: hidden;
+    }
+    .page-header::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        repeating-linear-gradient(90deg, transparent, transparent 79px, var(--rule) 79px, var(--rule) 80px),
+        repeating-linear-gradient(0deg,  transparent, transparent 79px, var(--rule) 79px, var(--rule) 80px);
+      opacity: 0.2;
+    }
+    .page-header-inner { position: relative; z-index: 1; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 24px; }
+    .page-header-text {}
+    .page-eyebrow { font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+    .page-h1 { font-family: 'Instrument Serif', serif; font-size: clamp(2.8rem, 5.5vw, 4.5rem); line-height: 1.06; letter-spacing: -0.025em; color: var(--ink); }
+    .page-h1 em { font-style: italic; color: var(--gold); }
+    .page-lead { font-family: 'DM Mono', monospace; font-size: 0.82rem; color: var(--ink3); margin-top: 16px; line-height: 1.7; max-width: 480px; }
+    .page-header-cta { flex-shrink: 0; }
+
+    .btn-primary { font-family: 'DM Mono', monospace; font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white); background: var(--ink); border: none; padding: 13px 28px; cursor: pointer; text-decoration: none; display: inline-block; transition: background 0.2s, transform 0.15s; }
+    .btn-primary:hover { background: var(--gold); transform: translateY(-1px); }
+
+    /* ── FILTERS ── */
+    .filters-bar {
+      padding: 24px 52px;
+      border-bottom: 1px solid var(--rule);
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      background: var(--cream);
+    }
+    .filter-label { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink3); margin-right: 4px; }
+    .filter-btn {
+      font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.08em;
+      padding: 6px 16px; border: 1.5px solid var(--rule);
+      background: var(--paper); color: var(--ink3); cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
+    }
+    .filter-btn:hover { border-color: var(--ink3); color: var(--ink); }
+    .filter-btn.active { border-color: var(--gold); background: var(--gold-light); color: var(--ink); }
+
+    .search-wrap { margin-left: auto; position: relative; }
+    .search-input {
+      font-family: 'DM Mono', monospace; font-size: 0.78rem;
+      padding: 8px 14px 8px 36px;
+      border: 1.5px solid var(--rule); background: var(--paper);
+      color: var(--ink); outline: none; width: 220px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .search-input:focus { border-color: var(--gold); background: var(--gold-light); }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 0.85rem; pointer-events: none; color: var(--ink3); }
+
+    /* ── ARTISTS GRID ── */
+    .artists-wrap { padding: 52px; }
+    .artists-count { font-family: 'DM Mono', monospace; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink3); margin-bottom: 32px; }
+    .artists-count span { color: var(--gold); font-weight: 500; }
+
+    .artists-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    /* ── ARTIST CARD ── */
+    .artist-card {
+      background: var(--white);
+      border: 1px solid var(--rule);
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+      color: inherit;
+    }
+    .artist-card:hover { border-color: var(--gold); transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,0.07); }
+
+    .card-photo {
+      width: 100%; height: 200px;
+      background: var(--ink);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .card-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .card-photo-placeholder { font-size: 3.5rem; }
+
+    /* Colourful gradient backgrounds per card when no photo */
+    .card-photo.grad-0 { background: linear-gradient(135deg, #1a0a2e, #0d1f3c); }
+    .card-photo.grad-1 { background: linear-gradient(135deg, #1a0a0a, #2d1a00); }
+    .card-photo.grad-2 { background: linear-gradient(135deg, #001a1a, #1a002d); }
+    .card-photo.grad-3 { background: linear-gradient(135deg, #0a1a0a, #1a1a00); }
+    .card-photo.grad-4 { background: linear-gradient(135deg, #1a1a00, #002d1a); }
+    .card-photo.grad-5 { background: linear-gradient(135deg, #0d0d1a, #1a0d0d); }
+
+    .card-genre-badge {
+      position: absolute; bottom: 12px; left: 12px;
+      font-family: 'DM Mono', monospace; font-size: 0.6rem;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 4px 10px;
+      background: rgba(0,0,0,0.55); color: rgba(255,255,255,0.85);
+      backdrop-filter: blur(4px);
+    }
+
+    .card-body { padding: 22px 22px 18px; }
+    .card-name { font-family: 'Instrument Serif', serif; font-size: 1.3rem; font-style: italic; color: var(--ink); margin-bottom: 4px; letter-spacing: -0.01em; }
+    .card-username { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--ink3); margin-bottom: 12px; }
+    .card-bio { font-family: 'DM Mono', monospace; font-size: 0.74rem; color: var(--ink2); line-height: 1.65; margin-bottom: 16px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+    .card-footer { padding: 14px 22px; border-top: 1px solid var(--rule); display: flex; align-items: center; justify-content: space-between; }
+    .card-socials { display: flex; gap: 8px; }
+    .card-social-icon { font-size: 0.9rem; opacity: 0.6; transition: opacity 0.2s; }
+    .card-social-icon:hover { opacity: 1; }
+    .card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .card-tag { font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; background: var(--cream); color: var(--ink3); border: 1px solid var(--rule); }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 80px 40px;
+      border: 1px dashed var(--rule);
+    }
+    .empty-icon { font-size: 3rem; margin-bottom: 20px; }
+    .empty-title { font-family: 'Instrument Serif', serif; font-size: 1.8rem; color: var(--ink); margin-bottom: 12px; }
+    .empty-title em { font-style: italic; color: var(--gold); }
+    .empty-body { font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--ink3); line-height: 1.7; max-width: 380px; margin: 0 auto 28px; }
+
+    /* ── MODAL (profile detail) ── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(12, 11, 9, 0.75);
+      backdrop-filter: blur(4px);
+      display: none; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--paper);
+      max-width: 620px; width: 100%;
+      max-height: 90vh; overflow-y: auto;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute; top: 16px; right: 16px;
+      font-family: 'DM Mono', monospace; font-size: 0.7rem;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--ink3); background: none; border: 1px solid var(--rule);
+      padding: 6px 12px; cursor: pointer; transition: color 0.2s, border-color 0.2s; z-index: 1;
+    }
+    .modal-close:hover { color: var(--ink); border-color: var(--ink3); }
+
+    .modal-photo { width: 100%; height: 260px; background: var(--ink); display: flex; align-items: center; justify-content: center; font-size: 5rem; overflow: hidden; }
+    .modal-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .modal-photo.grad-0 { background: linear-gradient(135deg, #1a0a2e, #0d1f3c); }
+    .modal-photo.grad-1 { background: linear-gradient(135deg, #1a0a0a, #2d1a00); }
+    .modal-photo.grad-2 { background: linear-gradient(135deg, #001a1a, #1a002d); }
+    .modal-photo.grad-3 { background: linear-gradient(135deg, #0a1a0a, #1a1a00); }
+    .modal-photo.grad-4 { background: linear-gradient(135deg, #1a1a00, #002d1a); }
+    .modal-photo.grad-5 { background: linear-gradient(135deg, #0d0d1a, #1a0d0d); }
+
+    .modal-body { padding: 32px 36px; }
+    .modal-eyebrow { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+    .modal-name { font-family: 'Instrument Serif', serif; font-size: 2rem; font-style: italic; color: var(--ink); margin-bottom: 4px; }
+    .modal-username { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--ink3); margin-bottom: 6px; }
+    .modal-location { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--ink3); margin-bottom: 20px; }
+
+    .modal-section-label { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink3); margin-bottom: 10px; margin-top: 24px; }
+    .modal-bio { font-size: 0.92rem; color: var(--ink2); line-height: 1.75; }
+    .modal-influences { font-family: 'DM Mono', monospace; font-size: 0.78rem; color: var(--ink3); line-height: 1.65; }
+
+    .modal-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+    .modal-tag { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 12px; background: var(--cream); color: var(--ink3); border: 1px solid var(--rule); }
+    .modal-tag.primary { background: var(--gold-light); color: var(--gold); border-color: var(--gold); }
+
+    .modal-socials { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+    .modal-social-link { display: flex; align-items: center; gap: 10px; font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--ink2); text-decoration: none; transition: color 0.2s; }
+    .modal-social-link:hover { color: var(--gold); }
+    .modal-social-link span:first-child { font-size: 1rem; width: 20px; text-align: center; }
+
+    .modal-footer { padding: 20px 36px 32px; display: flex; gap: 12px; border-top: 1px solid var(--rule); margin-top: 8px; }
+    .btn-gold-sm { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); background: var(--gold); border: none; padding: 11px 24px; cursor: pointer; text-decoration: none; display: inline-block; transition: background 0.2s; }
+    .btn-gold-sm:hover { background: var(--gold-vivid); }
+    .btn-ghost-sm { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink3); background: transparent; border: 1px solid var(--rule); padding: 11px 24px; cursor: pointer; text-decoration: none; display: inline-block; transition: border-color 0.2s, color 0.2s; }
+    .btn-ghost-sm:hover { border-color: var(--ink3); color: var(--ink); }
+
+    /* ── FOOTER ── */
+    footer { background: #080706; padding: 40px 52px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; border-top: 1px solid #1e1c18; }
+    .footer-logo { font-family: 'Instrument Serif', serif; font-size: 1rem; color: #4a4540; text-decoration: none; }
+    .footer-logo em { font-style: italic; color: var(--gold); }
+    .footer-links { display: flex; gap: 24px; list-style: none; }
+    .footer-links a { font-family: 'DM Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: #4a4540; text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: #8a8480; }
+    .footer-copy { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: #3a3530; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 860px) {
+      nav { padding: 18px 20px; }
+      .nav-links { display: none; }
+      .page-header { padding: 120px 20px 48px; }
+      .filters-bar { padding: 16px 20px; }
+      .artists-wrap { padding: 32px 20px; }
+      footer { padding: 32px 20px; flex-direction: column; align-items: flex-start; }
+      .search-wrap { margin-left: 0; width: 100%; }
+      .search-input { width: 100%; }
+      .modal-body { padding: 24px 20px; }
+      .modal-footer { padding: 16px 20px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="index.html" class="nav-logo">Sound<em>Stake</em></a>
+    <ul class="nav-links">
+      <li><a href="how-it-works.html">How It Works</a></li>
+      <li><a href="artists.html" class="active">Artists</a></li>
+      <li><a href="artist-upload.html">Upload Music</a></li>
+    </ul>
+    <a href="signup.html" class="nav-cta" id="nav-cta">Get Started</a>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div class="page-header-text">
+        <p class="page-eyebrow">The Community</p>
+        <h1 class="page-h1">Meet the <em>Artists</em></h1>
+        <p class="page-lead">Every artist here has opted into staked critique — they want real, substantive feedback. Browse their profiles, hear what they're working on, and leave notes that actually matter.</p>
+      </div>
+      <div class="page-header-cta">
+        <a href="artist-profile.html" class="btn-primary">Set Up My Artist Profile →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters-bar">
+    <span class="filter-label">Genre:</span>
+    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+    <button class="filter-btn" onclick="setFilter('Indie / Shoegaze', this)">Indie</button>
+    <button class="filter-btn" onclick="setFilter('Electronic / Ambient', this)">Electronic</button>
+    <button class="filter-btn" onclick="setFilter('Hip-Hop / Trap', this)">Hip-Hop</button>
+    <button class="filter-btn" onclick="setFilter('R&B / Soul', this)">R&amp;B</button>
+    <button class="filter-btn" onclick="setFilter('Lo-fi / Jazz', this)">Lo-fi</button>
+    <button class="filter-btn" onclick="setFilter('Pop', this)">Pop</button>
+    <button class="filter-btn" onclick="setFilter('Folk / Singer-Songwriter', this)">Folk</button>
+    <button class="filter-btn" onclick="setFilter('Experimental', this)">Experimental</button>
+    <button class="filter-btn" onclick="setFilter('Classical / Orchestral', this)">Classical</button>
+    <button class="filter-btn" onclick="setFilter('Metal / Rock', this)">Metal / Rock</button>
+    <button class="filter-btn" onclick="setFilter('Other', this)">Other</button>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" type="text" id="search-input" placeholder="Search artists…" oninput="renderArtists()" />
+    </div>
+  </div>
+
+  <!-- ARTISTS GRID -->
+  <div class="artists-wrap">
+    <p class="artists-count" id="artists-count">Loading…</p>
+    <div class="artists-grid" id="artists-grid"></div>
+  </div>
+
+  <!-- PROFILE MODAL -->
+  <div class="modal-overlay" id="modal" onclick="closeModal(event)">
+    <div class="modal" id="modal-inner">
+      <button class="modal-close" onclick="closeModalDirect()">Close ×</button>
+      <div class="modal-photo" id="modal-photo"><span id="modal-photo-emoji">🎵</span></div>
+      <div class="modal-body">
+        <p class="modal-eyebrow" id="modal-genre">—</p>
+        <h2 class="modal-name" id="modal-name">—</h2>
+        <p class="modal-username" id="modal-username">—</p>
+        <p class="modal-location" id="modal-location"></p>
+
+        <p class="modal-section-label">About</p>
+        <p class="modal-bio" id="modal-bio">—</p>
+
+        <div id="modal-influences-wrap" style="display:none">
+          <p class="modal-section-label">Influences</p>
+          <p class="modal-influences" id="modal-influences"></p>
+        </div>
+
+        <div id="modal-tags-wrap" style="display:none">
+          <p class="modal-section-label">Genres</p>
+          <div class="modal-tags" id="modal-tags"></div>
+        </div>
+
+        <div id="modal-socials-wrap" style="display:none">
+          <p class="modal-section-label">Links</p>
+          <div class="modal-socials" id="modal-socials"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a href="artist-upload.html" class="btn-gold-sm">View Tracks</a>
+        <button class="btn-ghost-sm" onclick="closeModalDirect()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <a href="index.html" class="footer-logo">Sound<em>Stake</em></a>
+    <ul class="footer-links">
+      <li><a href="how-it-works.html">How It Works</a></li>
+      <li><a href="artists.html">Artists</a></li>
+      <li><a href="signup.html">Sign Up</a></li>
+      <li><a href="artist-upload.html">Upload Music</a></li>
+    </ul>
+    <p class="footer-copy">© 2026 SoundStake · Built on Base · IPFS · ERC-20 / ERC-721</p>
+  </footer>
+
+  <script>
+    // ── Data ──
+    // Load all users who are artists and have a saved profile
+    function getArtists() {
+      const users = JSON.parse(localStorage.getItem('ss_users') || '[]');
+      return users.filter(function(u) {
+        return u.role === 'artist' && u.artistProfile && u.artistProfile.artistName;
+      });
+    }
+
+    // ── Demo seed data (shows even before anyone signs up) ──
+    var DEMO_ARTISTS = [
+      {
+        id: 'demo-1',
+        first: 'Maya', last: 'Chen', username: 'maya_chen', role: 'artist',
+        artistProfile: {
+          artistName: 'Maya Chen',
+          genre: 'Indie / Shoegaze',
+          location: 'Brooklyn, NY',
+          bio: 'Crafting slow-burn guitar textures and layered vocals somewhere between shoegaze and dream pop. Looking for feedback on mixing and arrangement — especially how the low-mids sit in the final master.',
+          influences: 'DIIV, Grouper, Japanese Breakfast',
+          tags: ['Indie', 'Shoegaze', 'Dream Pop'],
+          photo: null,
+          socials: { soundcloud: 'mayachen', instagram: 'maya.sounds', spotify: '', x: '', youtube: '', website: '' }
+        }
+      },
+      {
+        id: 'demo-2',
+        first: 'DJ', last: 'Kenzo', username: 'djkenzo', role: 'artist',
+        artistProfile: {
+          artistName: 'DJ Kenzo',
+          genre: 'Electronic / Ambient',
+          location: 'Nairobi, Kenya',
+          bio: 'Afro-electronic producer blending traditional East African percussion with synthesizer textures. My last EP got 40K plays in two weeks — working on something bigger now and need ears I can trust.',
+          influences: 'Burial, Arca, William Onyeabor',
+          tags: ['Electronic', 'Afrobeats', 'Ambient'],
+          photo: null,
+          socials: { soundcloud: 'djkenzo_nbi', instagram: 'djkenzo', spotify: 'djkenzo', x: 'djkenzo', youtube: '', website: 'djkenzo.com' }
+        }
+      },
+      {
+        id: 'demo-3',
+        first: 'Vera', last: 'Lux', username: 'veralux', role: 'artist',
+        artistProfile: {
+          artistName: 'Vera Lux',
+          genre: 'Pop',
+          location: 'Seoul, South Korea',
+          bio: 'Hyperpop and bubblegum bass with Korean and English lyrics. I produce everything myself in my apartment. Feedback wanted on the vocal processing — I'm going for that blown-out but still emotive sound.',
+          influences: 'SOPHIE, 100 gecs, Charli XCX',
+          tags: ['Pop', 'Experimental', 'Hyperpop'],
+          photo: null,
+          socials: { soundcloud: '', instagram: 'veralux.music', spotify: 'veralux', x: 'veraluxmusic', youtube: 'veralux', website: '' }
+        }
+      },
+      {
+        id: 'demo-4',
+        first: 'Theo', last: 'Cross', username: 'theocross', role: 'artist',
+        artistProfile: {
+          artistName: 'Theo Cross',
+          genre: 'Folk / Singer-Songwriter',
+          location: 'London, UK',
+          bio: 'Fingerpicked acoustic guitar and sparse arrangements. I write about memory and place. Currently finishing a six-track EP and looking for critique on whether the narrative arc holds across the whole thing.',
+          influences: 'Bon Iver, Fleet Foxes, Iron & Wine',
+          tags: ['Folk', 'Indie'],
+          photo: null,
+          socials: { soundcloud: 'theocross', instagram: '', spotify: 'theocross', x: '', youtube: 'theocrossmusic', website: 'theocross.co.uk' }
+        }
+      }
+    ];
+
+    // ── State ──
+    var activeFilter = 'all';
+
+    function setFilter(genre, btn) {
+      activeFilter = genre;
+      document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      renderArtists();
+    }
+
+    // ── Render ──
+    function renderArtists() {
+      var realArtists = getArtists();
+      // Merge: real users first, then demo artists (exclude demo if a real one has same username)
+      var realUsernames = realArtists.map(function(a) { return a.username; });
+      var demoFiltered = DEMO_ARTISTS.filter(function(d) { return !realUsernames.includes(d.username); });
+      var all = realArtists.concat(demoFiltered);
+
+      var search = (document.getElementById('search-input').value || '').toLowerCase().trim();
+
+      // Apply filters
+      var filtered = all.filter(function(a) {
+        var p = a.artistProfile;
+        var matchesGenre = activeFilter === 'all';
+        if (!matchesGenre) {
+          if (p.genre === activeFilter) matchesGenre = true;
+          if (!matchesGenre && p.genre) {
+            var filterWords = activeFilter.toLowerCase().split(/[\s\/,]+/).filter(Boolean);
+            var genreWords = p.genre.toLowerCase().split(/[\s\/,]+/).filter(Boolean);
+            matchesGenre = filterWords.some(function(fw) { return genreWords.some(function(gw) { return gw === fw; }); });
+          }
+          if (!matchesGenre && p.tags && p.tags.length) {
+            matchesGenre = p.tags.some(function(t) {
+              var tl = t.toLowerCase();
+              return tl === activeFilter.toLowerCase() ||
+                activeFilter.toLowerCase().split(/[\s\/,]+/).filter(Boolean).some(function(fw) { return tl === fw; });
+            });
+          }
+        }
+        var matchesSearch = !search ||
+          p.artistName.toLowerCase().includes(search) ||
+          (p.bio && p.bio.toLowerCase().includes(search)) ||
+          (p.genre && p.genre.toLowerCase().includes(search)) ||
+          (p.location && p.location.toLowerCase().includes(search)) ||
+          (p.influences && p.influences.toLowerCase().includes(search)) ||
+          (p.tags && p.tags.some(function(t) { return t.toLowerCase().includes(search); }));
+        return matchesGenre && matchesSearch;
+      });
+
+      var grid = document.getElementById('artists-grid');
+      var countEl = document.getElementById('artists-count');
+      countEl.innerHTML = 'Showing <span>' + filtered.length + '</span> artist' + (filtered.length !== 1 ? 's' : '');
+
+      if (!filtered.length) {
+        grid.innerHTML = '<div class="empty-state">' +
+          '<div class="empty-icon">🎵</div>' +
+          '<h2 class="empty-title">No artists <em>yet</em></h2>' +
+          '<p class="empty-body">No artists match your search. Try a different filter, or be the first to set up your profile.</p>' +
+          '<a href="artist-profile.html" class="btn-primary">Create Artist Profile</a>' +
+          '</div>';
+        return;
+      }
+
+      grid.innerHTML = filtered.map(function(a, i) {
+        return buildCard(a, i);
+      }).join('');
+    }
+
+    function buildCard(artist, index) {
+      var p = artist.artistProfile;
+      var grad = 'grad-' + (index % 6);
+      var photoHtml = p.photo
+        ? '<img src="' + esc(p.photo) + '" alt="' + esc(p.artistName) + '" />'
+        : '<span class="card-photo-placeholder">🎵</span>';
+
+      var socialIcons = [];
+      if (p.socials) {
+        if (p.socials.soundcloud) socialIcons.push('🎵');
+        if (p.socials.spotify) socialIcons.push('🎧');
+        if (p.socials.instagram) socialIcons.push('📸');
+        if (p.socials.x) socialIcons.push('🐦');
+        if (p.socials.youtube) socialIcons.push('🎬');
+        if (p.socials.website) socialIcons.push('🌐');
+      }
+
+      var tags = (p.tags || []).slice(0, 3).map(function(t) {
+        return '<span class="card-tag">' + esc(t) + '</span>';
+      }).join('');
+
+      return '<div class="artist-card" onclick="openModal(\'' + esc(artist.id || artist.username) + '\')">' +
+        '<div class="card-photo ' + grad + '">' + photoHtml +
+        '<span class="card-genre-badge">' + esc(p.genre || '') + '</span>' +
+        '</div>' +
+        '<div class="card-body">' +
+        '<div class="card-name">' + esc(p.artistName) + '</div>' +
+        '<div class="card-username">@' + esc(artist.username) + (p.location ? ' · ' + esc(p.location) : '') + '</div>' +
+        '<div class="card-bio">' + esc(p.bio || '') + '</div>' +
+        '</div>' +
+        '<div class="card-footer">' +
+        '<div class="card-socials">' + socialIcons.map(function(icon) { return '<span class="card-social-icon">' + icon + '</span>'; }).join('') + '</div>' +
+        '<div class="card-tags">' + tags + '</div>' +
+        '</div>' +
+        '</div>';
+    }
+
+    // ── Modal ──
+    var allArtistsCache = [];
+
+    function openModal(id) {
+      var realArtists = getArtists();
+      var demoFiltered = DEMO_ARTISTS.filter(function(d) { return !realArtists.map(function(a){return a.username;}).includes(d.username); });
+      allArtistsCache = realArtists.concat(demoFiltered);
+
+      var artist = allArtistsCache.find(function(a) {
+        return (a.id && String(a.id) === String(id)) || a.username === id;
+      });
+      if (!artist) return;
+
+      var p = artist.artistProfile;
+      var index = allArtistsCache.indexOf(artist);
+      var grad = 'grad-' + (index % 6);
+
+      // Photo
+      var modalPhoto = document.getElementById('modal-photo');
+      modalPhoto.className = 'modal-photo ' + grad;
+      if (p.photo) {
+        modalPhoto.innerHTML = '<img src="' + esc(p.photo) + '" alt="' + esc(p.artistName) + '" />';
+      } else {
+        modalPhoto.innerHTML = '<span style="font-size:4rem">🎵</span>';
+      }
+
+      document.getElementById('modal-genre').textContent = p.genre || '';
+      document.getElementById('modal-name').textContent = p.artistName;
+      document.getElementById('modal-username').textContent = '@' + artist.username;
+      document.getElementById('modal-location').textContent = p.location ? '📍 ' + p.location : '';
+      document.getElementById('modal-bio').textContent = p.bio || '';
+
+      // Influences
+      var infWrap = document.getElementById('modal-influences-wrap');
+      if (p.influences) { document.getElementById('modal-influences').textContent = p.influences; infWrap.style.display = ''; }
+      else infWrap.style.display = 'none';
+
+      // Tags
+      var tagsWrap = document.getElementById('modal-tags-wrap');
+      var tagsEl = document.getElementById('modal-tags');
+      var allTags = [];
+      if (p.genre) allTags.push({ label: p.genre, primary: true });
+      if (p.tags) p.tags.forEach(function(t) { if (t !== p.genre) allTags.push({ label: t, primary: false }); });
+      if (allTags.length) {
+        tagsEl.innerHTML = allTags.map(function(t) {
+          return '<span class="modal-tag' + (t.primary ? ' primary' : '') + '">' + esc(t.label) + '</span>';
+        }).join('');
+        tagsWrap.style.display = '';
+      } else tagsWrap.style.display = 'none';
+
+      // Socials
+      var socialsWrap = document.getElementById('modal-socials-wrap');
+      var socialsEl = document.getElementById('modal-socials');
+      var socialLinks = [];
+      if (p.socials) {
+        if (p.socials.soundcloud) socialLinks.push(['🎵', 'SoundCloud', 'https://soundcloud.com/' + p.socials.soundcloud]);
+        if (p.socials.spotify)    socialLinks.push(['🎧', 'Spotify', 'https://open.spotify.com/artist/' + p.socials.spotify]);
+        if (p.socials.instagram)  socialLinks.push(['📸', 'Instagram', 'https://instagram.com/' + p.socials.instagram]);
+        if (p.socials.x)          socialLinks.push(['🐦', 'X / Twitter', 'https://x.com/' + p.socials.x]);
+        if (p.socials.youtube)    socialLinks.push(['🎬', 'YouTube', 'https://youtube.com/@' + p.socials.youtube]);
+        if (p.socials.website)    socialLinks.push(['🌐', p.socials.website, 'https://' + p.socials.website]);
+      }
+      if (socialLinks.length) {
+        socialsEl.innerHTML = socialLinks.map(function(s) {
+          return '<a class="modal-social-link" href="' + esc(s[2]) + '" target="_blank" rel="noopener">' +
+            '<span>' + s[0] + '</span><span>' + esc(s[1]) + '</span>' +
+            '</a>';
+        }).join('');
+        socialsWrap.style.display = '';
+      } else socialsWrap.style.display = 'none';
+
+      document.getElementById('modal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(e) {
+      if (e.target === document.getElementById('modal')) closeModalDirect();
+    }
+    function closeModalDirect() {
+      document.getElementById('modal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModalDirect(); });
+
+    // ── Helpers ──
+    function esc(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    // ── Init ──
+    renderArtists();
+
+    // Re-render if user just saved a profile in another tab
+    window.addEventListener('storage', function() { renderArtists(); });
+  </script>
+  <script>
+    (function() {
+      var sess = JSON.parse(localStorage.getItem('ss_session') || 'null');
+      var cta = document.getElementById('nav-cta');
+      if (!cta || !sess || !sess.username) return;
+      var profileHref = sess.role === 'artist' ? 'artist-profile.html' : 'artists.html';
+      var profileLabel = sess.role === 'artist' ? 'My Profile' : 'Browse Artists';
+      cta.outerHTML =
+        '<a href="' + profileHref + '" class="nav-cta" id="nav-cta">' + profileLabel + '</a>' +
+        '<a href="#" onclick="localStorage.removeItem(\'ss_session\');location.reload();return false;" style="font-family:\'DM Mono\',monospace;font-size:0.72rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);text-decoration:none;margin-left:16px;">Sign Out</a>';
+    })();
+  </script>
+
+</body>
+</html>
